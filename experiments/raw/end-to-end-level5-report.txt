@@ -1,0 +1,399 @@
+====================================================================================================
+python3 workloads/np_linalg.py 3000 float32   (pid 1357)
+  wall 4.23 s, CPU 42.32 s on 32 threads, mode offload
+  in intercepted calls: 2.22 s = 52.6% of wall time (11,538 calls from the application, 57,599 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    lapack syevd       float64             1         1      0.450    10.6%    539.9   3000
+    blas3 gemm         float32            68         0      0.375     8.9%    190.0   3000x64x3000
+    lapack geqrf       float64            60         0      0.305     7.2%      4.8   3000x64
+    lapack gesv        float64             6         0      0.304     7.2%    358.4   3000x8
+    blas2 gemv         float64         3,780         0      0.292     6.9%      2.5   2969x32
+    lapack gesdd       float64             1         0      0.265     6.3%     90.7   2000x1000
+    blas2 ger          float64         3,780         0      0.182     4.3%      4.0   2969x32
+    blas3 syrk         float32             1         0      0.041     1.0%    653.7   3000x3000
+    blas1 scal         float64         3,840         0      0.009     0.2%      1.2   2968
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                           10,498      0.036     1.6%
+    10 us - 1 ms                         786      0.080     3.6%
+    1 ms - 100 ms                        252      1.393    62.6%
+    >= 100 ms                              2      0.715    32.1%
+
+  Precision: float64 81%, float32 19% of intercepted time
+  Offloading: 1 calls ran on the GPU in 0.450 s (0.016 s of that copying data)
+    the CPU was predicted to need 1.417 s for them; GPU time was predicted 0.397 s, actual 0.450 s
+    stayed on the CPU, predicted gain too small: 47
+    stayed on the CPU, GPU start-up not yet worth it: 29
+  Top call sites:
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x142fc                 1 calls     0.450 s
+    _multiarray_umath.cpython-312-x86_64-linux-gnu.so+0x410c1c           68 calls     0.375 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0xf21c                 60 calls     0.305 s
+====================================================================================================
+python3 workloads/np_linalg.py 6000 float32   (pid 1479)
+  wall 10.96 s, CPU 93.55 s on 32 threads, mode offload
+  in intercepted calls: 6.69 s = 61.1% of wall time (11,538 calls from the application, 104,981 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    lapack syevd       float64             1         1      2.270    20.7%    856.4   6000
+    lapack gesv        float64             6         0      1.909    17.4%    454.4   6000x8
+    lapack gesdd       float64             1         0      1.228    11.2%    156.3   4000x2000
+    blas3 gemm         float32            68         0      0.908     8.3%    313.3   6000x64x6000
+    blas3 syrk         float32             1         0      0.133     1.2%   1627.3   6000x6000
+    lapack geqrf       float64            60         0      0.129     1.2%     22.7   6000x64
+    blas2 gemv         float64         3,780         0      0.063     0.6%     22.9   5969x32
+    blas2 ger          float64         3,780         0      0.036     0.3%     40.5   5969x32
+    blas1 scal         float64         3,840         0      0.018     0.2%      1.3   5968
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                            9,444      0.047     0.7%
+    10 us - 1 ms                       1,958      0.068     1.0%
+    1 ms - 100 ms                        127      1.039    15.5%
+    >= 100 ms                              9      5.540    82.8%
+
+  Precision: float64 84%, float32 16% of intercepted time
+  Offloading: 1 calls ran on the GPU in 2.270 s (0.059 s of that copying data)
+    the CPU was predicted to need 11.100 s for them; GPU time was predicted 2.230 s, actual 2.270 s
+    stayed on the CPU, predicted gain too small: 75
+    stayed on the CPU, GPU start-up not yet worth it: 1
+  Top call sites:
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x142fc                 1 calls     2.270 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0xa257                  6 calls     1.909 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x16365                 1 calls     1.228 s
+====================================================================================================
+python3 workloads/np_linalg.py 3000 float64   (pid 1297)
+  wall 6.95 s, CPU 71.66 s on 32 threads, mode offload
+  in intercepted calls: 4.39 s = 63.2% of wall time (11,538 calls from the application, 57,583 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    lapack gesdd       float64             1         0      2.586    37.2%      9.3   2000x1000
+    lapack gesv        float64             6         0      0.597     8.6%    182.3   3000x8
+    lapack syevd       float64             1         1      0.590     8.5%    411.8   3000
+    blas3 gemm         float64            68         0      0.440     6.3%    161.9   3000x64x3000
+    lapack geqrf       float64            60         0      0.071     1.0%     20.7   3000x64
+    blas3 syrk         float64             1         0      0.044     0.6%    617.0   3000x3000
+    blas2 gemv         float64         3,780         0      0.031     0.4%     23.2   2969x32
+    blas2 ger          float64         3,780         0      0.021     0.3%     34.6   2969x32
+    blas1 scal         float64         3,840         0      0.009     0.1%      1.3   2968
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                           10,712      0.037     0.8%
+    10 us - 1 ms                         729      0.057     1.3%
+    1 ms - 100 ms                         93      0.709    16.2%
+    >= 100 ms                              4      3.585    81.7%
+
+  Precision: float64 100%, float32 0% of intercepted time
+  Offloading: 1 calls ran on the GPU in 0.590 s (0.032 s of that copying data)
+    the CPU was predicted to need 1.417 s for them; GPU time was predicted 0.397 s, actual 0.590 s
+    stayed on the CPU, predicted gain too small: 75
+    stayed on the CPU, GPU start-up not yet worth it: 1
+  Top call sites:
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x16365                 1 calls     2.586 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0xa257                  6 calls     0.597 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x142fc                 1 calls     0.590 s
+====================================================================================================
+python3 workloads/np_linalg.py 6000 float64   (pid 1417)
+  wall 18.20 s, CPU 190.31 s on 32 threads, mode offload
+  in intercepted calls: 13.22 s = 72.6% of wall time (11,538 calls from the application, 104,983 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    lapack gesdd       float64             1         0      6.603    36.3%     29.1   4000x2000
+    lapack syevd       float64             1         1      2.265    12.4%    858.3   6000
+    lapack gesv        float64             6         0      1.979    10.9%    438.3   6000x8
+    blas3 gemm         float64            68         0      1.885    10.4%    151.0   6000x64x6000
+    blas3 syrk         float64             1         0      0.303     1.7%    713.2   6000x6000
+    lapack geqrf       float64            60         0      0.100     0.5%     29.5   6000x64
+    blas2 gemv         float64         3,780         0      0.042     0.2%     34.4   5969x32
+    blas2 ger          float64         3,780         0      0.024     0.1%     59.8   5969x32
+    blas1 scal         float64         3,840         0      0.018     0.1%      1.3   5968
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                            9,841      0.050     0.4%
+    10 us - 1 ms                       1,562      0.036     0.3%
+    1 ms - 100 ms                        126      1.983    15.0%
+    >= 100 ms                              9     11.150    84.4%
+
+  Precision: float64 100%, float32 0% of intercepted time
+  Offloading: 1 calls ran on the GPU in 2.265 s (0.071 s of that copying data)
+    the CPU was predicted to need 11.100 s for them; GPU time was predicted 2.230 s, actual 2.265 s
+    stayed on the CPU, predicted gain too small: 76
+  Top call sites:
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x16365                 1 calls     6.603 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x142fc                 1 calls     2.265 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0xa257                  6 calls     1.979 s
+====================================================================================================
+python3 workloads/np_mlp_f32.py   (pid 1537)
+  wall 2.48 s, CPU 31.27 s on 32 threads, mode offload
+  in intercepted calls: 0.75 s = 30.3% of wall time (5,618 calls from the application, 0 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    blas3 gemm         float32         5,617         0      0.751    30.3%    577.0   256x256x512
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                              415      0.004     0.5%
+    10 us - 1 ms                       5,164      0.650    86.5%
+    1 ms - 100 ms                         39      0.098    13.1%
+    >= 100 ms                              0      0.000     0.0%
+
+  Precision: float64 0%, float32 100% of intercepted time
+  Offloading: 0 calls ran on the GPU in 0.000 s (0.000 s of that copying data)
+    stayed on the CPU, predicted gain too small: 5,437
+    stayed on the CPU, GPU start-up not yet worth it: 180
+  Top call sites:
+    _multiarray_umath.cpython-312-x86_64-linux-gnu.so+0x410c1c        5,617 calls     0.751 s
+    _multiarray_umath.cpython-312-x86_64-linux-gnu.so+0x3ff74             1 calls     0.000 s
+====================================================================================================
+python3 workloads/np_signal.py   (pid 1589)
+  wall 0.61 s, CPU 2.52 s on 32 threads, mode offload
+  in intercepted calls: 0.00 s = 0.0% of wall time (1 calls from the application, 0 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                                0      0.000     0.0%
+    10 us - 1 ms                           1      0.000   100.0%
+    1 ms - 100 ms                          0      0.000     0.0%
+    >= 100 ms                              0      0.000     0.0%
+
+  Precision: float64 0%, float32 100% of intercepted time
+  Host-to-GPU copies if every call were offloaded: 0.0 MB copying per call, 0.0 MB keeping unchanged data on the GPU (50% avoided, 1 of 2 reads reused)
+  Top call sites:
+    _multiarray_umath.cpython-312-x86_64-linux-gnu.so+0x3ff74             1 calls     0.000 s
+====================================================================================================
+/usr/libexec/octave/8.4.0/exec/x86_64-pc-linux-gnu/octave-gui --no-gui --quiet workloads/octave_signal.m   (pid 1796)
+  wall 2.10 s, CPU 7.75 s on 32 threads, mode offload
+  in intercepted calls: 0.31 s = 14.8% of wall time (25,611 calls from the application, 12,897 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    fftw fft           float64           612         0      0.165     7.9%     18.1   65536x1
+    lapack syev        float64             1         0      0.052     2.5%     43.9   1200
+    blas3 gemm         float64             2         0      0.040     1.9%    790.7   2500x2500x2500
+    blas3 syrk         float64             1         0      0.022     1.0%    722.7   2500x2500
+    lapack potrf       float64             1         0      0.017     0.8%    314.2   2500
+    fftw plan          float64             3         0      0.004     0.2%        -   65536x1
+    blas1 dot          float64        12,495         0      0.004     0.2%      7.4   1250
+    blas1 axpy         float64        12,495         0      0.004     0.2%      8.3   1250
+    lapack potrs       float64             1         0      0.002     0.1%     20.2   2500x4
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                           24,977      0.008     2.5%
+    10 us - 1 ms                         614      0.145    46.8%
+    1 ms - 100 ms                         20      0.157    50.7%
+    >= 100 ms                              0      0.000     0.0%
+
+  Precision: float64 100%, float32 0% of intercepted time
+  Offloading: 0 calls ran on the GPU in 0.000 s (0.000 s of that copying data)
+    stayed on the CPU, predicted gain too small: 2
+    stayed on the CPU, GPU start-up not yet worth it: 3
+  Top call sites:
+    liboctave.so.10.0.2+0x809cb5                                        300 calls     0.092 s
+    liboctave.so.10.0.2+0x80a882                                        300 calls     0.053 s
+    liboctave.so.10.0.2+0x78816b                                          1 calls     0.052 s
+====================================================================================================
+python3 workloads/pandas_etl.py   (pid 1732)
+  wall 7.85 s, CPU 9.24 s on 32 threads, mode offload
+  in intercepted calls: 0.00 s = 0.0% of wall time (1 calls from the application, 0 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                                0      0.000     0.0%
+    10 us - 1 ms                           1      0.000   100.0%
+    1 ms - 100 ms                          0      0.000     0.0%
+    >= 100 ms                              0      0.000     0.0%
+
+  Precision: float64 0%, float32 100% of intercepted time
+  Host-to-GPU copies if every call were offloaded: 0.0 MB copying per call, 0.0 MB keeping unchanged data on the GPU (50% avoided, 1 of 2 reads reused)
+  Top call sites:
+    _multiarray_umath.cpython-312-x86_64-linux-gnu.so+0x3ff74             1 calls     0.000 s
+====================================================================================================
+~/venvs/pypi/bin/python workloads/np_linalg.py 6000 float32   (pid 1990)
+  wall 11.00 s, CPU 96.11 s on 32 threads, mode offload
+  in intercepted calls: 6.98 s = 63.4% of wall time (19,098 calls from the application, 120,709 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    lapack syevd       float64             1         1      2.296    20.9%    846.8   6000
+    lapack gesv        float64             6         0      1.960    17.8%    442.5   6000x8
+    lapack gesdd       float64             1         0      1.353    12.3%    141.9   4000x2000
+    blas3 gemm         float32            68         0      0.483     4.4%    589.1   6000x64x6000
+    lapack geqrf       float64            60         0      0.394     3.6%      7.5   6000x64
+    blas2 ger          float64         3,780         0      0.197     1.8%      7.3   5968x32
+    blas2 gemv         float64         3,780         0      0.142     1.3%     10.2   5968x32
+    blas3 syrk         float32             1         0      0.131     1.2%   1651.2   6000x6000
+    blas1 scal         float64         3,840         0      0.019     0.2%      1.2   5968
+    blas1 axpy         float64         7,560         0      0.001     0.0%      0.9   32
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                           12,541      0.023     0.3%
+    10 us - 1 ms                       6,421      0.336     4.8%
+    1 ms - 100 ms                        127      0.877    12.6%
+    >= 100 ms                              9      5.740    82.3%
+
+  Precision: float64 91%, float32 9% of intercepted time
+  Offloading: 1 calls ran on the GPU in 2.296 s (0.072 s of that copying data)
+    the CPU was predicted to need 11.100 s for them; GPU time was predicted 2.230 s, actual 2.296 s
+    stayed on the CPU, predicted gain too small: 75
+    stayed on the CPU, GPU start-up not yet worth it: 1
+  Top call sites:
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0xa2c9                  1 calls     2.296 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x8391                  6 calls     1.960 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x1f637                 1 calls     1.353 s
+====================================================================================================
+~/venvs/pypi/bin/python workloads/np_linalg.py 6000 float64   (pid 1928)
+  wall 13.46 s, CPU 125.51 s on 32 threads, mode offload
+  in intercepted calls: 8.90 s = 66.1% of wall time (19,098 calls from the application, 120,700 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    lapack syevd       float64             1         1      2.287    17.0%    850.1   6000
+    lapack gesv        float64             6         0      2.179    16.2%    398.1   6000x8
+    lapack gesdd       float64             1         0      1.233     9.2%    155.8   4000x2000
+    blas3 gemm         float64            68         0      1.144     8.5%    248.7   6000x64x6000
+    lapack geqrf       float64            60         0      0.919     6.8%      3.2   6000x64
+    blas2 ger          float64         3,780         0      0.707     5.3%      2.0   5968x32
+    blas3 syrk         float64             1         0      0.287     2.1%    753.8   6000x6000
+    blas2 gemv         float64         3,780         0      0.124     0.9%     11.6   5968x32
+    blas1 scal         float64         3,840         0      0.017     0.1%      1.3   5968
+    blas1 axpy         float64         7,560         0      0.001     0.0%      0.9   32
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                           12,923      0.024     0.3%
+    10 us - 1 ms                       5,861      0.351     3.9%
+    1 ms - 100 ms                        305      2.537    28.5%
+    >= 100 ms                              9      5.985    67.3%
+
+  Precision: float64 100%, float32 0% of intercepted time
+  Offloading: 1 calls ran on the GPU in 2.287 s (0.060 s of that copying data)
+    the CPU was predicted to need 11.100 s for them; GPU time was predicted 2.230 s, actual 2.287 s
+    stayed on the CPU, predicted gain too small: 76
+  Top call sites:
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0xa2c9                  1 calls     2.287 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x8391                  6 calls     2.179 s
+    _umath_linalg.cpython-312-x86_64-linux-gnu.so+0x1f637                 1 calls     1.233 s
+====================================================================================================
+~/venvs/pypi/bin/python workloads/sklearn_pipeline.py   (pid 2079)
+  wall 11.18 s, CPU 92.69 s on 32 threads, mode offload
+  in intercepted calls: 4.71 s = 42.1% of wall time (467,871 calls from the application, 1 nested inside them)
+  note: the application calls from several threads at once; the times below add up across threads
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    blas3 gemm         float64       467,664         0     10.794    96.5%     11.1   16x256x30
+    lapack gesdd       float64             1         0      3.083    27.6%     16.8   300000x120
+    blas3 syrk         float64             1         0      0.129     1.2%     33.4   120x300000
+    blas2 gemv         float64            52         0      0.108     1.0%      5.2   300000x4
+    blas1 dot          float64           111         0      0.002     0.0%      0.5   6
+    lapack potrf       float64            19         0      0.000     0.0%      4.1   4
+    lapack potrs       float64             1         0      0.000     0.0%      0.6   120x1
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+    blas1 scal         float64             7         0      0.000     0.0%      0.1   31
+    blas1 nrm2         float64            13         0      0.000     0.0%      0.4   31
+    blas1 axpy         float64             1         0      0.000     0.0%      0.1   31
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                           84,959      0.683     4.8%
+    10 us - 1 ms                     382,764      9.768    69.2%
+    1 ms - 100 ms                        146      0.453     3.2%
+    >= 100 ms                              2      3.213    22.8%
+
+  Precision: float64 100%, float32 0% of intercepted time
+  Offloading: 0 calls ran on the GPU in 0.000 s (0.000 s of that copying data)
+    stayed on the CPU, predicted gain too small: 37
+    stayed on the CPU, GPU start-up not yet worth it: 1
+  Top call sites:
+    _cython_blas.cpython-312-x86_64-linux-gnu.so+0xb83a             467,628 calls    10.602 s
+    _batched_linalg.cpython-312-x86_64-linux-gnu.so+0x20c4d               1 calls     3.083 s
+    _multiarray_umath.cpython-312-x86_64-linux-gnu.so+0x117848           31 calls     0.156 s
+====================================================================================================
+/usr/lib/R/bin/exec/R --no-echo --no-restore --file=workloads/r_regression.R   (pid 1865)
+  wall 2.35 s, CPU 16.71 s on 32 threads, mode offload
+  in intercepted calls: 0.58 s = 24.5% of wall time (4,156 calls from the application, 12,178 nested inside them)
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    blas1 dot          float64         1,952         0      0.263    11.2%      5.9   399982
+    lapack gesdd       float64             1         0      0.060     2.5%     72.5   100000x60
+    blas3 gemm         float64             2         0      0.059     2.5%    541.1   2500x2500x2500
+    blas1 axpy         float64         2,012         0      0.057     2.4%     27.6   399982
+    blas3 syrk         float64             1         0      0.049     2.1%     29.7   60x400000
+    lapack syevr       float64             1         0      0.029     1.2%     45.4   1000
+    blas1 nrm2         float64           122         0      0.024     1.0%      4.0   400000
+    blas2 gemv         float64             2         0      0.015     0.6%      6.3   400000x60
+    lapack potrf       float64             1         0      0.015     0.6%    346.4   2500
+    blas1 scal         float64            61         0      0.005     0.2%      4.6   399970
+    lapack gesv        float64             1         0      0.000     0.0%      1.0   60x1
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                              236      0.002     0.3%
+    10 us - 1 ms                       3,912      0.348    60.4%
+    1 ms - 100 ms                          8      0.227    39.4%
+    >= 100 ms                              0      0.000     0.0%
+
+  Precision: float64 100%, float32 0% of intercepted time
+  Offloading: 0 calls ran on the GPU in 0.000 s (0.000 s of that copying data)
+    stayed on the CPU, predicted gain too small: 3
+    stayed on the CPU, GPU start-up not yet worth it: 2
+  Top call sites:
+    libR.so+0x25a58d                                                  1,830 calls     0.248 s
+    lapack.so+0x7b9e                                                      1 calls     0.060 s
+    libR.so+0x98333                                                       2 calls     0.059 s
+====================================================================================================
+python3 workloads/sklearn_pipeline.py   (pid 1661)
+  wall 8.52 s, CPU 83.83 s on 32 threads, mode offload
+  in intercepted calls: 4.59 s = 53.8% of wall time (467,869 calls from the application, 2,788 nested inside them)
+  note: the application calls from several threads at once; the times below add up across threads
+
+  By operation                         calls    on GPU     time s   % wall   GFLOP/s   typical size
+    blas3 gemm         float64       467,664         0     10.424   122.3%     11.5   16x256x30
+    lapack gesdd       float64             1         0      3.026    35.5%     17.1   300000x120
+    blas2 gemv         float64            51         0      0.097     1.1%      5.7   300000x4
+    blas3 syrk         float64             1         0      0.095     1.1%     45.3   120x300000
+    lapack posv        float64             1         0      0.001     0.0%      0.5   120x1
+    blas1 dot          float64           124         0      0.000     0.0%      4.9   30
+    lapack potrf       float64            18         0      0.000     0.0%      0.0   4
+    blas1 dot          float32             1         0      0.000     0.0%      0.0   2
+    blas1 scal         float64             7         0      0.000     0.0%      0.1   31
+    blas1 axpy         float64             1         0      0.000     0.0%      0.1   31
+
+  By call duration                     calls     time s   % of intercepted time
+    < 10 us                          109,252      0.892     6.5%
+    10 us - 1 ms                     358,523      9.321    68.3%
+    1 ms - 100 ms                         93      0.406     3.0%
+    >= 100 ms                              1      3.026    22.2%
+
+  Precision: float64 100%, float32 0% of intercepted time
+  Offloading: 0 calls ran on the GPU in 0.000 s (0.000 s of that copying data)
+    stayed on the CPU, predicted gain too small: 38
+  Top call sites:
+    _cython_blas.cpython-312-x86_64-linux-gnu.so+0x4f0d4            467,628 calls    10.262 s
+    _flapack.cpython-312-x86_64-linux-gnu.so+0x37050                      1 calls     3.026 s
+    _multiarray_umath.cpython-312-x86_64-linux-gnu.so+0x4109cc           31 calls     0.133 s
+
+====================================================================================================
+SUMMARY
+  program                                    wall s  intercepted  in calls >= 1 ms  float64  reuse   on GPU
+  np_linalg_f32: python3                       4.23        52.6%             49.8%      81%    58%        1
+  np_linalg_f32_large: python3                10.96        61.1%             60.0%      84%    64%        1
+  np_linalg_f64: python3                       6.95        63.2%             61.8%     100%    66%        1
+  np_linalg_f64_large: python3                18.20        72.6%             72.1%     100%    73%        1
+  np_mlp_f32: python3                          2.48        30.3%              4.0%       0%    33%        0
+  np_signal: python3                           0.61         0.0%              0.0%        -      -        0
+  octave_signal: octave-gui                    2.10        14.8%              7.5%     100%    27%        0
+  pandas_etl: python3                          7.85         0.0%              0.0%        -      -        0
+  pypi_np_linalg_f32: python                  11.00        63.4%             60.2%      91%    64%        1
+  pypi_np_linalg_f64: python                  13.46        66.1%             63.3%     100%    74%        1
+  pypi_sklearn: python                        11.18        42.1%             32.2%     100%    67%        0
+  r_regression: R                              2.35        24.5%              9.6%     100%    73%        0
+  sklearn_pipeline: python3                    8.52        53.8%             39.9%     100%    67%        0
+
+  intercepted      = share of wall time inside BLAS / LAPACK / FFTW calls made by the application
+  in calls >= 1 ms = the part of that share in calls long enough to be worth offloading
+  float64          = share of intercepted time in double precision
+  reuse            = host-to-GPU copy volume a keep-data-on-GPU policy would avoid (upper bound)
+  on GPU           = calls that were offloaded in this run

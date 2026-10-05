@@ -1,0 +1,21 @@
+name: Feature request
+description: An operation to offload, a platform to support, or another improvement
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you need, and for which program or workload?
+      description: If it is about an operation, the output of `gpu-offload measure <your command>` shows which calls dominate.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposed approach (optional)
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I would like to work on this

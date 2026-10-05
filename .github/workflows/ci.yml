@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    # Hosted runners have no GPU: this builds the measurement part and runs the CPU steps of the
+    # test suite (measure mode, reference checks on the CPU libraries, fallback, overhead).
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build python3-numpy libopenblas-dev liblapacke-dev libfftw3-dev
+      - name: Build and test
+        run: ./build.sh test
+      - name: Build the package
+        run: ./build.sh package

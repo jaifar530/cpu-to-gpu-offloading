@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use gpu-offload in your work, please cite it as below."
+title: "gpu-offload: transparent CPU-to-GPU offloading of BLAS and LAPACK calls for unmodified programs"
+type: software
+authors:
+  - family-names: "Alshizawi"
+    given-names: "Jaifar"
+repository-code: "https://github.com/jaifar530/cpu-to-gpu-offloading"
+url: "https://jaifar530.github.io/cpu-to-gpu-offloading/"
+license: AGPL-3.0-only
+version: 0.1.1
+date-released: "2026-10-05"
+abstract: >-
+  gpu-offload is an LD_PRELOAD library and command-line tool for Linux that runs the BLAS and
+  LAPACK calls of unmodified programs on an NVIDIA GPU when a per-machine calibration predicts a
+  speedup, with automatic CPU fallback. A cost model fitted from measurements of each operation,
+  precision and problem size on the machine's own CPU and GPU decides per call, including the cost
+  of data copies, and is corrected at run time.
+keywords:
+  - GPU offloading
+  - transparent acceleration
+  - BLAS
+  - LAPACK
+  - CUDA
+  - cuBLAS
+  - cuSOLVER
+  - LD_PRELOAD
+  - heterogeneous computing
+  - auto-tuning
+  - NumPy

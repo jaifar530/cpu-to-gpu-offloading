@@ -1,0 +1,275 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-only
+"""gpu-offload: run unmodified programs with their heavy math on the GPU when that is faster.
+
+  gpu-offload calibrate            learn this machine (run once, and again after hardware changes)
+  gpu-offload run CMD...           run a program with automatic offloading
+  gpu-offload level [1-10]         show or set how eagerly work goes to the GPU
+  gpu-offload status               show what is installed and what calibration learned
+  gpu-offload env                  print shell settings that offload everything started from a shell
+  gpu-offload measure CMD...       only record the program's math-library calls, then report
+  gpu-offload report DIR...        report on recorded traces
+  gpu-offload estimate DIR...      predict from traces what each level would save
+"""
+import argparse
+import os
+import shutil
+import subprocess
+import sys
+import tempfile
+
+HOME = os.path.dirname(os.path.realpath(__file__))
+sys.path.insert(0, HOME)
+LIB = os.path.join(HOME, "libgpuoffload.so")
+BACKEND = os.path.join(HOME, "libgpuoffload-cuda.so")
+CALIBRATE = os.path.join(HOME, "gpu-offload-calibrate")
+USER_CONFIG = os.path.join(os.path.expanduser("~"), ".config", "gpu-offload", "config")
+SYSTEM_DIR = "/etc/gpu-offload"
+
+
+def preload_env(extra):
+    env = dict(os.environ)
+    env["LD_PRELOAD"] = LIB + (":" + env["LD_PRELOAD"] if env.get("LD_PRELOAD") else "")
+    env.update(extra)
+    return env
+
+
+def need_library():
+    if not os.path.exists(LIB):
+        raise SystemExit(f"gpu-offload: {LIB} is missing; the installation is incomplete")
+
+
+def current_level():
+    if os.environ.get("GPU_OFFLOAD_LEVEL", "").isdigit():
+        return int(os.environ["GPU_OFFLOAD_LEVEL"]), "GPU_OFFLOAD_LEVEL"
+    for path in (USER_CONFIG, os.path.join(SYSTEM_DIR, "config")):
+        try:
+            with open(path) as f:
+                for line in f:
+                    words = line.split()
+                    if len(words) == 2 and words[0] == "level" and words[1].isdigit():
+                        return int(words[1]), path
+        except OSError:
+            pass
+    return 5, "default"
+
+
+def physical_cores():
+    cores = set()
+    try:
+        out = subprocess.run(["lscpu", "-p=core,socket"], capture_output=True, text=True).stdout
+        cores = {line for line in out.splitlines() if line and not line.startswith("#")}
+    except OSError:
+        pass
+    return len(cores)
+
+
+# ---------------------------------------------------------------------------------------------
+# Commands
+# ---------------------------------------------------------------------------------------------
+
+def find_profile():
+    # Kept free of the NumPy-based modules: `run` should add no noticeable start-up time.
+    for path in (os.environ.get("GPU_OFFLOAD_PROFILE"), os.path.join(os.path.dirname(USER_CONFIG), "profile"),
+                 os.path.join(SYSTEM_DIR, "profile")):
+        if path and os.path.exists(path):
+            return path
+    return None
+
+
+def cmd_run(args):
+    need_library()
+    if not args.command:
+        raise SystemExit("gpu-offload run: no command given")
+    extra = {"GPU_OFFLOAD_MODE": "offload"}
+    if not args.quiet:
+        extra["GPU_OFFLOAD_SUMMARY"] = "1"
+    if args.level:
+        extra["GPU_OFFLOAD_LEVEL"] = str(args.level)
+    if args.trace:
+        extra["GPU_OFFLOAD_TRACE"] = os.path.abspath(args.trace)
+    if args.verify:
+        extra["GPU_OFFLOAD_VERIFY"] = "1"
+    if not find_profile() and not args.verify:
+        print("gpu-offload: this machine is not calibrated, so everything stays on the CPU. "
+              "Run `gpu-offload calibrate` first.", file=sys.stderr)
+    os.execvpe(args.command[0], args.command, preload_env(extra))
+
+
+def cmd_measure(args):
+    import ofl_report
+    need_library()
+    if not args.command:
+        raise SystemExit("gpu-offload measure: no command given")
+    out = os.path.abspath(args.output) if args.output else tempfile.mkdtemp(prefix="gpu-offload-trace-")
+    code = subprocess.run(args.command, env=preload_env({"GPU_OFFLOAD_MODE": "measure", "GPU_OFFLOAD_TRACE": out})).returncode
+    print()
+    ofl_report.report([out])
+    print(f"\ntrace kept in {out}")
+    return code
+
+
+def cmd_report(args):
+    import ofl_report
+    ofl_report.report(args.dirs)
+
+
+def cmd_estimate(args):
+    import ofl_model
+    path = find_profile()
+    if not path:
+        raise SystemExit("gpu-offload: this machine is not calibrated; run `gpu-offload calibrate` first")
+    ofl_model.estimate(args.dirs, ofl_model.load(path))
+
+
+def cmd_level(args):
+    if args.value is None:
+        level, source = current_level()
+        print(f"level {level} ({source})")
+        return
+    if not 1 <= args.value <= 10:
+        raise SystemExit("gpu-offload: the level must be between 1 (most cautious) and 10 (most eager)")
+    path = os.path.join(SYSTEM_DIR, "config") if args.system else USER_CONFIG
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w") as f:
+        f.write(f"level {args.value}\n")
+    print(f"level {args.value} saved to {path}")
+
+
+def cmd_env(args):
+    need_library()
+    print(f'export LD_PRELOAD="{LIB}${{LD_PRELOAD:+:$LD_PRELOAD}}"')
+    print("# use it with:  eval \"$(gpu-offload env)\"   (undo with: unset LD_PRELOAD)")
+
+
+def cmd_status(args):
+    import ofl_model
+    print(f"library   {LIB}: {'ok' if os.path.exists(LIB) else 'MISSING'}")
+    print(f"backend   {BACKEND}: {'ok' if os.path.exists(BACKEND) else 'missing (CPU only)'}")
+    try:
+        gpu = subprocess.run(["nvidia-smi", "--query-gpu=name,memory.used,memory.total,utilization.gpu",
+                              "--format=csv,noheader"], capture_output=True, text=True).stdout.strip()
+    except OSError:
+        gpu = ""
+    print(f"GPU       {gpu or 'not found (nvidia-smi unavailable)'}")
+    level, source = current_level()
+    print(f"level     {level} ({source})")
+    path = find_profile()
+    if not path:
+        print("profile   none: run `gpu-offload calibrate`")
+        return
+    print(f"profile   {path}")
+    ofl_model.describe(ofl_model.load(path))
+
+
+def run_calibration(force, trace_dir, extra_args, env_extra=None, quiet=False):
+    env = preload_env({"GPU_OFFLOAD_MODE": "offload", "GPU_OFFLOAD_FORCE": force, "GPU_OFFLOAD_TRACE": trace_dir,
+                       **(env_extra or {})})
+    env.pop("GPU_OFFLOAD_VERIFY", None)
+    result = subprocess.run([CALIBRATE] + extra_args, env=env, stderr=subprocess.DEVNULL if quiet else None)
+    if result.returncode:
+        raise SystemExit(f"gpu-offload: the calibration workload failed on the {force.upper()}")
+
+
+def thread_advice(tmp):
+    """OpenBLAS defaults to one thread per logical CPU, which can be far slower than one per core."""
+    import ofl_model
+    cores = physical_cores()
+    if os.environ.get("OPENBLAS_NUM_THREADS") or not cores or cores >= (os.cpu_count() or 0):
+        return
+    probe = ["--ops", "gemm", "--precs", "s", "--min-n", "2048", "--max-n", "2048"]
+    seconds = {}
+    for name, env in (("default", {}), ("cores", {"OPENBLAS_NUM_THREADS": str(cores)})):
+        d = os.path.join(tmp, "threads-" + name)
+        run_calibration("cpu", d, probe, env, quiet=True)
+        points, _, _ = ofl_model._points(d, "cpu")
+        times = [t for by_size in points.values() for ts in by_size.values() for t in ts]
+        seconds[name] = min(times) if times else 0
+    if seconds["cores"] > 0 and seconds["default"] > 1.5 * seconds["cores"]:
+        print(f"\nNote: the CPU math library is {seconds['default'] / seconds['cores']:.1f}x faster with "
+              f"OPENBLAS_NUM_THREADS={cores} (one thread per core) than with its default on this machine.\n"
+              f"      Calibration measures the CPU as your programs will use it. For the best CPU baseline,\n"
+              f"      export OPENBLAS_NUM_THREADS={cores} in your shell profile and calibrate again.\n")
+
+
+def cmd_calibrate(args):
+    import ofl_model
+    need_library()
+    if not os.path.exists(BACKEND):
+        raise SystemExit("gpu-offload: the CUDA backend is not installed, there is nothing to calibrate")
+    max_n = 2048 if args.quick else 8192 if args.full else 4096
+    workload = ["--max-n", str(max_n), "--precs", args.precs]
+    path = os.path.join(SYSTEM_DIR, "profile") if args.system else os.path.join(os.path.dirname(USER_CONFIG), "profile")
+
+    tmp = tempfile.mkdtemp(prefix="gpu-offload-calibrate-")
+    try:
+        thread_advice(tmp)
+        print(f"Measuring the CPU (problem sizes up to {max_n})...")
+        run_calibration("cpu", os.path.join(tmp, "cpu"), workload)
+        print("Measuring the GPU...")
+        run_calibration("gpu", os.path.join(tmp, "gpu"), workload)
+        profile = ofl_model.fit(os.path.join(tmp, "cpu"), os.path.join(tmp, "gpu"), ofl_model.machine_info())
+    finally:
+        if args.keep:
+            print(f"calibration traces kept in {tmp}")
+        else:
+            shutil.rmtree(tmp, ignore_errors=True)
+    ofl_model.save(profile, path)
+    print(f"\nProfile written to {path}")
+    ofl_model.describe(ofl_model.load(path))
+
+
+def main():
+    parser = argparse.ArgumentParser(prog="gpu-offload", description=__doc__,
+                                     formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = parser.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("run", help="run a program with automatic offloading")
+    p.add_argument("-l", "--level", type=int, choices=range(1, 11), metavar="1-10", help="aggressiveness for this run")
+    p.add_argument("--trace", metavar="DIR", help="also record every call to DIR (see `report`)")
+    p.add_argument("--verify", action="store_true",
+                   help="run every GPU-capable call on both devices, compare, and keep the CPU result")
+    p.add_argument("-q", "--quiet", action="store_true", help="no summary at exit")
+    p.add_argument("command", nargs=argparse.REMAINDER)
+    p.set_defaults(fn=cmd_run)
+
+    p = sub.add_parser("measure", help="record a program's math-library calls without offloading")
+    p.add_argument("-o", "--output", metavar="DIR", help="trace directory (default: a new temporary one)")
+    p.add_argument("command", nargs=argparse.REMAINDER)
+    p.set_defaults(fn=cmd_measure)
+
+    p = sub.add_parser("calibrate", help="learn this machine: where the GPU beats the CPU")
+    p.add_argument("--quick", action="store_true", help="sizes up to 2048 (a few minutes less, coarser)")
+    p.add_argument("--full", action="store_true", help="sizes up to 8192 (slower, better for very large problems)")
+    p.add_argument("--precs", default="sdcz", help="precisions to calibrate: s, d, c, z (default: all)")
+    p.add_argument("--system", action="store_true", help=f"write {SYSTEM_DIR}/profile for all users (needs root)")
+    p.add_argument("--keep", action="store_true", help="keep the calibration traces")
+    p.set_defaults(fn=cmd_calibrate)
+
+    p = sub.add_parser("level", help="show or set the aggressiveness level")
+    p.add_argument("value", nargs="?", type=int)
+    p.add_argument("--system", action="store_true", help=f"write {SYSTEM_DIR}/config for all users (needs root)")
+    p.set_defaults(fn=cmd_level)
+
+    p = sub.add_parser("status", help="show installation, GPU, level and what calibration learned")
+    p.set_defaults(fn=cmd_status)
+
+    p = sub.add_parser("env", help="print shell settings that offload every program started from this shell")
+    p.set_defaults(fn=cmd_env)
+
+    p = sub.add_parser("report", help="report on recorded traces")
+    p.add_argument("dirs", nargs="+", metavar="DIR")
+    p.set_defaults(fn=cmd_report)
+
+    p = sub.add_parser("estimate", help="predict from traces what each level would save")
+    p.add_argument("dirs", nargs="+", metavar="DIR")
+    p.set_defaults(fn=cmd_estimate)
+
+    args = parser.parse_args()
+    if getattr(args, "command", None) and args.command[0] == "--":
+        args.command = args.command[1:]
+    sys.exit(args.fn(args) or 0)
+
+
+if __name__ == "__main__":
+    main()

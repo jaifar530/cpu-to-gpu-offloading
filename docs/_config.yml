@@ -1,0 +1,37 @@
+title: gpu-offload
+tagline: Transparent CPU-to-GPU offloading for unmodified programs
+description: >-
+  gpu-offload runs the heavy math (BLAS and LAPACK calls) of unmodified programs such as NumPy, R
+  and Octave scripts on an NVIDIA GPU when a per-machine calibration predicts that the GPU is
+  faster, with automatic CPU fallback. No code changes, no recompilation.
+url: https://jaifar530.github.io
+baseurl: /cpu-to-gpu-offloading
+lang: en
+
+remote_theme: just-the-docs/just-the-docs
+plugins:
+  - jekyll-remote-theme
+  - jekyll-seo-tag
+  - jekyll-sitemap
+
+search_enabled: true
+heading_anchors: true
+aux_links:
+  "gpu-offload on GitHub":
+    - https://github.com/jaifar530/cpu-to-gpu-offloading
+gh_edit_link: true
+gh_edit_link_text: Edit this page on GitHub
+gh_edit_repository: https://github.com/jaifar530/cpu-to-gpu-offloading
+gh_edit_branch: main
+gh_edit_source: docs
+gh_edit_view_mode: edit
+footer_content: >-
+  Copyright 2026 Jaifar Alshizawi. gpu-offload is open source under the GNU AGPL v3; a commercial licence is available.
+  Contributions are welcome.
+
+# Read by jekyll-seo-tag for search engines and link previews.
+author: Jaifar Alshizawi
+social:
+  name: gpu-offload
+  links:
+    - https://github.com/jaifar530/cpu-to-gpu-offloading

@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://jaifar530.github.io/cpu-to-gpu-offloading/
+    about: Usage, design, experiments and FAQ.
+  - name: Report a security problem privately
+    url: https://github.com/jaifar530/cpu-to-gpu-offloading/security/advisories/new
+    about: Please do not open public issues for vulnerabilities.

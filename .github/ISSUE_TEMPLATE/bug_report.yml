@@ -1,0 +1,45 @@
+name: Bug report
+description: A program misbehaves, a result is wrong, or gpu-offload crashes or fails
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The exact command, and a small script if possible.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: verify
+    attributes:
+      label: Output of `gpu-offload run --verify <your command>`
+      description: The summary printed at exit. It shows whether GPU and CPU results differ.
+      render: text
+  - type: textarea
+    id: status
+    attributes:
+      label: Output of `gpu-offload status`
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: System
+      description: Distribution and version, native Linux or WSL2, NVIDIA driver and CUDA versions, CPU math library and its thread count.
+    validations:
+      required: true
+  - type: dropdown
+    id: without
+    attributes:
+      label: Does the problem disappear with `GPU_OFFLOAD_MODE=off`?
+      options: ["Yes", "No", "Not tried"]
+    validations:
+      required: true

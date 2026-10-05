@@ -1,0 +1,58 @@
+library   ~/build/gpu-offload/libgpuoffload.so: ok
+backend   ~/build/gpu-offload/libgpuoffload-cuda.so: ok
+GPU       NVIDIA GeForce RTX 5080, 896 MiB, 16303 MiB, 1 %
+level     5 (default)
+profile   ~/.config/gpu-offload/profile
+  calibrated: 2026-10-05 00:18
+  cpu: AMD Ryzen 9 9950X3D 16-Core Processor (32 threads)
+  blas threads: 16
+  GPU start-up 0.36 s, host-to-GPU 9.7 GB/s, GPU-to-host 7.8 GB/s
+
+  GPU speedup over the CPU for square problems, copies included (- = not measured)
+  operation          precision     n=256    n=512   n=1024   n=2048   n=4096   n=8192   GPU wins from
+  gemm               complex64      0.5x     0.9x     2.3x     3.1x     3.6x     5.5x   n >= 1024
+  gemm               float64        0.3x     0.4x     0.4x     0.5x     0.6x     0.8x   never
+  gemm               float32        0.3x     0.5x     0.8x     1.4x     2.7x     4.7x   n >= 2048
+  gemm               complex128     0.3x     0.5x     0.5x     0.6x     0.7x     0.8x   never
+  gesv               complex64      0.7x     1.6x     3.2x     6.2x    11.9x    19.1x   n >= 512
+  gesv               float64        0.3x     0.6x     1.1x     2.1x     0.9x     1.4x   n >= 2048
+  gesv               float32        0.4x     0.7x     1.7x     3.2x     6.4x    11.9x   n >= 1024
+  gesv               complex128     0.4x     0.8x     1.5x     2.7x     0.7x     0.8x   n >= 1024
+  singular values    complex64      0.3x     0.6x     1.3x     2.6x    12.4x    21.9x   n >= 1024
+  singular values    float64        0.3x     0.5x     0.9x     1.9x     6.9x    21.1x   n >= 2048
+  singular values    float32        0.3x     0.4x     0.8x     1.4x     5.1x    16.8x   n >= 2048
+  singular values    complex128     0.4x     0.6x     0.8x     2.4x     9.3x        -   n >= 2048
+  SVD with vectors   complex64      0.3x     0.6x     1.1x     1.9x     3.4x     5.5x   n >= 2048
+  SVD with vectors   float64        0.3x     0.5x     0.9x     0.8x     2.7x        -   n >= 4096
+  SVD with vectors   float32        1.9x     0.9x     1.1x     3.2x     3.0x     6.2x   n >= 256
+  SVD with vectors   complex128     0.2x     0.3x     0.5x     0.7x     2.0x        -   n >= 4096
+  getrf              complex64      3.5x     2.9x     1.9x     1.4x     2.1x     3.0x   n >= 256
+  getrf              float64        1.1x     2.0x     0.9x     0.8x     0.9x     0.8x   n >= 512
+  getrf              float32        1.1x     1.2x     1.1x     1.1x     1.3x     2.4x   n >= 4096
+  getrf              complex128     0.7x     0.5x     0.4x     0.6x     0.7x     0.8x   never
+  herk               complex64      0.3x     0.6x     0.8x     1.6x     3.0x     5.1x   n >= 2048
+  herk               complex128     0.2x     0.2x     0.3x     0.5x     0.6x     0.9x   never
+  posv               complex64      0.4x     0.5x     0.6x     0.8x     1.4x     2.7x   n >= 4096
+  posv               float64        0.2x     1.4x     1.0x     9.2x     1.2x     1.7x   n >= 512
+  posv               float32        0.3x     0.4x     0.6x     0.7x     0.9x     1.3x   never
+  posv               complex128     0.2x     0.3x     0.3x     0.4x     0.5x     0.7x   never
+  potrf              complex64      0.7x     0.7x     0.6x     0.7x     1.1x     1.8x   n >= 8192
+  potrf              float64        0.2x     0.3x     0.9x     2.1x     0.9x     1.4x   n >= 2048
+  potrf              float32        0.6x     0.4x     0.6x     0.6x     0.7x     1.2x   never
+  potrf              complex128     0.2x     0.2x     0.2x     0.3x     0.5x     0.7x   never
+  eigenvalues        complex64      2.4x     5.8x    20.0x    11.1x     4.7x     8.9x   n >= 256
+  eigenvalues        float64        0.3x     1.3x     1.4x     6.7x     4.0x     6.1x   n >= 512
+  eigenvalues        float32        1.0x     1.7x     2.5x     2.7x     3.5x     5.6x   n >= 512
+  eigenvalues        complex128     0.6x     1.0x     1.4x     1.7x     3.4x     6.8x   n >= 1024
+  eigenvectors       complex64      2.0x     3.7x     8.3x    11.7x        -        -   n >= 256
+  eigenvectors       float64        0.7x     1.3x     2.3x     3.3x     3.7x     6.2x   n >= 512
+  eigenvectors       float32        1.8x     2.9x     5.4x     7.2x     8.9x    10.2x   n >= 256
+  eigenvectors       complex128     0.8x     1.1x     1.7x     4.5x    19.1x        -   n >= 1024
+  syrk               complex64      0.3x     0.5x     1.6x     1.6x     2.7x     4.5x   n >= 1024
+  syrk               float64        0.3x     0.3x     0.3x     0.4x     0.5x     0.7x   never
+  syrk               float32        0.2x     0.4x     0.6x     0.9x     1.5x     2.8x   n >= 4096
+  syrk               complex128     0.2x     0.2x     0.4x     0.5x     0.6x     0.8x   never
+  trsm               complex64      0.4x     0.5x     0.9x     1.4x     2.2x     3.9x   n >= 2048
+  trsm               float64        0.1x     0.2x     0.3x     0.4x     0.4x     0.6x   never
+  trsm               float32        0.3x     0.4x     0.6x     0.9x     1.5x     2.9x   n >= 4096
+  trsm               complex128     0.1x     0.2x     0.4x     0.4x     0.6x     0.9x   never

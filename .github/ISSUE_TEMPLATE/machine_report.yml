@@ -1,0 +1,55 @@
+name: Machine report
+description: Share what calibration learned on your machine, or benchmark results (no coding needed)
+labels: [machine report]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you. gpu-offload has been measured on one machine so far; every additional CPU / GPU
+        pair shows where its cost model holds. Please calibrate while the machine is otherwise idle.
+  - type: input
+    id: cpu
+    attributes:
+      label: CPU
+      placeholder: AMD Ryzen 9 9950X3D, 16 cores / 32 threads
+    validations:
+      required: true
+  - type: input
+    id: gpu
+    attributes:
+      label: GPU, driver and CUDA versions
+      placeholder: NVIDIA GeForce RTX 5080 16 GB, driver 616.92, CUDA 13.3
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: Operating system
+      placeholder: Ubuntu 24.04 in WSL2 on Windows 11
+    validations:
+      required: true
+  - type: input
+    id: blas
+    attributes:
+      label: CPU math library and thread count
+      placeholder: OpenBLAS 0.3.26, OPENBLAS_NUM_THREADS=16
+    validations:
+      required: true
+  - type: textarea
+    id: status
+    attributes:
+      label: Output of `gpu-offload status`
+      description: "Run it after `gpu-offload calibrate`, and say which option you used (--quick, default or --full)."
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: bench
+    attributes:
+      label: Benchmark table (optional)
+      description: Output of `python3 workloads/bench.py --reps 3 --levels 5,9`.
+      render: text
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything surprising?

@@ -1,0 +1,88 @@
+End-to-end timings, plain versus `gpu-offload run`, as printed by the benchmark drivers.
+Machine: AMD Ryzen 9 9950X3D, NVIDIA GeForce RTX 5080, Ubuntu 24.04 in WSL2, CUDA 13.3.
+Profile: experiments/raw/machine-profile.txt.
+
+=== Single runs, level 5, all workloads (2026-10-05; offloaded runs also traced to disk) ===
+
+OPENBLAS_NUM_THREADS=16, level 5 (default)
+
+workload                   plain s  offloaded s   speedup  output
+np_linalg_f64                 7.51         6.23     1.21x  same
+np_linalg_f32                 6.11         4.45     1.37x  same
+np_linalg_f64_large          32.82        16.56     1.98x  same
+np_linalg_f32_large          22.45        11.18     2.01x  same
+np_mlp_f32                    2.55         2.60     0.98x  same
+np_signal                     0.71         0.72     0.99x  same
+sklearn_pipeline              6.43         8.66     0.74x  same
+pandas_etl                    9.94         7.96     1.25x  same
+octave_signal                 2.38         2.27     1.05x  same
+r_regression                  2.66         2.53     1.05x  same
+pypi_np_linalg_f64           19.42        11.75     1.65x  same
+pypi_np_linalg_f32           19.09        11.18     1.71x  same
+pypi_sklearn                 11.05         9.40     1.18x  same
+
+=== Medians of 3 interleaved runs, levels 5 and 9 (2026-10-05; workloads/bench.py --reps 3 --levels 5,9) ===
+
+OPENBLAS_NUM_THREADS=16, 3 run(s) each, median times
+
+workload                plain s   level 5 s  speedup   level 9 s  speedup  output
+np_linalg_f64              4.18        3.83    1.09x        3.90    1.07x  same
+np_linalg_f32              3.92        3.89    1.01x        3.88    1.01x  same
+np_linalg_f64_large       20.76       13.53    1.53x       12.30    1.69x  same
+np_linalg_f32_large       19.06       11.90    1.60x       11.50    1.66x  same
+np_mlp_f32                 5.72        5.46    1.05x        4.55    1.26x  same
+np_signal                  0.66        0.72    0.92x        0.86    0.77x  same
+sklearn_pipeline          10.83        8.21    1.32x        9.07    1.19x  same
+
+The run was stopped here: the Windows host had 3.6 GB of 125.7 GB memory free (other virtual
+machines held about 91 GB). pandas_etl, octave_signal, r_regression and the three pypi_* workloads
+were not reached.
+
+=== Thread-count experiment (2026-10-04; plain runs, no gpu-offload) ===
+
+np_linalg.py   threads=32    37.20 s
+np_linalg.py   threads=16     2.47 s
+np_linalg.py   threads=8      2.55 s
+np_mlp_f32.py  threads=32    56.59 s
+np_mlp_f32.py  threads=16     2.36 s
+np_mlp_f32.py  threads=8      2.19 s
+
+=== Matrix product, CPU (OpenBLAS) versus GPU (cuBLAS) (2026-10-04) ===
+
+First run, OpenBLAS default threads, single run:
+
+dgemm (float64)  n=4096  (128 MB per matrix)
+  CPU OpenBLAS     :    197.1 ms
+  GPU copy in      :     19.4 ms
+  GPU cuBLAS       :    182.0 ms
+  GPU copy out     :      9.4 ms
+  GPU total        :    210.8 ms
+  max |cpu-gpu|    : 1.616e-13 (relative 5.545e-15)  MATCH
+dgemm (float64)  n=8192  (512 MB per matrix)
+  CPU OpenBLAS     :   1083.3 ms
+  GPU copy in      :     78.7 ms
+  GPU cuBLAS       :   1398.4 ms
+  GPU copy out     :     41.5 ms
+  GPU total        :   1518.5 ms
+  max |cpu-gpu|    : 3.482e-13 (relative 7.864e-15)  MATCH
+sgemm (float32)  n=4096  (64 MB per matrix)
+  CPU OpenBLAS     :     78.5 ms
+  GPU copy in      :     10.7 ms
+  GPU cuBLAS       :      3.9 ms
+  GPU copy out     :      5.1 ms
+  GPU total        :     19.7 ms
+  max |cpu-gpu|    : 3.564e-05 (relative 1.223e-06)  MATCH
+sgemm (float32)  n=8192  (256 MB per matrix)
+  CPU OpenBLAS     :    540.6 ms
+  GPU copy in      :     42.1 ms
+  GPU cuBLAS       :     30.1 ms
+  GPU copy out     :     20.3 ms
+  GPU total        :     92.4 ms
+  max |cpu-gpu|    : 1.907e-04 (relative 4.308e-06)  MATCH
+
+Repeated with OPENBLAS_NUM_THREADS=16, best of 3:
+
+dgemm (float64)  n=4096  (128 MB per matrix): CPU 162.6 ms, GPU incl. copies 224.9 ms
+dgemm (float64)  n=8192  (512 MB per matrix): CPU 1425.8 ms, GPU incl. copies 1601.7 ms
+sgemm (float32)  n=4096  (64 MB per matrix): CPU 70.1 ms, GPU incl. copies 22.4 ms
+sgemm (float32)  n=8192  (256 MB per matrix): CPU 557.3 ms, GPU incl. copies 94.5 ms

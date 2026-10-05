@@ -1,0 +1,31 @@
+# gpu-offload
+
+> gpu-offload is an open-source Linux tool (AGPL-3.0, commercial licence available) that transparently runs the BLAS and LAPACK calls of unmodified programs (NumPy, SciPy, R, GNU Octave, C, C++, Fortran) on an NVIDIA GPU when a per-machine calibration predicts that the GPU is faster, and falls back to the CPU otherwise. It is an LD_PRELOAD library with cuBLAS / cuSOLVER behind it and a command-line tool. No source changes and no recompilation are needed.
+
+Key facts:
+
+- Usage: `gpu-offload calibrate` once per machine, then `gpu-offload run <command>`.
+- Decision: per call, a cost model compares predicted CPU time with predicted GPU time including data copies; one setting from 1 to 10 controls how much predicted gain is required.
+- Offloaded operations: gemm, syrk, herk, trsm, getrf, gesv, potrf, posv, syev / syevd / heev / heevd, gesdd / gesvd, in float32, float64, complex64 and complex128.
+- Measured on an AMD Ryzen 9 9950X3D with an NVIDIA GeForce RTX 5080 (WSL2, CUDA 13.3): whole-program speedup 1.53x to 1.69x on NumPy linear algebra at n = 6000; no change on pandas, NumPy FFT, scikit-learn k-means and small neural-network workloads.
+- On that machine a float64 matrix product is never faster on the GPU (0.8x at n = 8192), a float32 one is 4.7x faster, and a float64 eigendecomposition is 3.7x faster at n = 4096 and 6.2x at n = 8192.
+- Licence: dual-licensed, GNU AGPL v3 or a commercial licence from the copyright holder (Jaifar Alshizawi).
+- Limits: copies data to and from the GPU on every offloaded call; Linux and NVIDIA CUDA 13 only; opt-in per command; version 0.1 prototype tested on one machine.
+- Repository: https://github.com/jaifar530/cpu-to-gpu-offloading
+
+## Documentation
+
+- [Overview](https://jaifar530.github.io/cpu-to-gpu-offloading/): what it is and why the decision is learned per machine
+- [Install and use](https://jaifar530.github.io/cpu-to-gpu-offloading/usage.html): installation, commands, environment variables, troubleshooting
+- [How it works](https://jaifar530.github.io/cpu-to-gpu-offloading/how-it-works.html): interception, machine profile, cost model, the level, run-time learning, GPU backend
+- [When to use it](https://jaifar530.github.io/cpu-to-gpu-offloading/when-to-use.html): where it is excellent, where it does nothing, where not to use it
+- [Experiments and benchmarks](https://jaifar530.github.io/cpu-to-gpu-offloading/experiments.html): every measurement, the full calibration table, correctness tests, end-to-end results
+- [Comparison](https://jaifar530.github.io/cpu-to-gpu-offloading/comparison.html): NVBLAS, SCILIB-Accel, CuPy, cudf.pandas, cuml.accel and others
+- [FAQ](https://jaifar530.github.io/cpu-to-gpu-offloading/faq.html): short answers to common questions
+
+## Project
+
+- [README](https://github.com/jaifar530/cpu-to-gpu-offloading/blob/main/README.md)
+- [Contributing](https://github.com/jaifar530/cpu-to-gpu-offloading/blob/main/CONTRIBUTING.md)
+- [Changelog](https://github.com/jaifar530/cpu-to-gpu-offloading/blob/main/CHANGELOG.md)
+- [Releases](https://github.com/jaifar530/cpu-to-gpu-offloading/releases)

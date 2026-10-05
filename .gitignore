@@ -1,0 +1,6 @@
+# Private research notes, not part of the published project.
+00.brainstorming/
+build/
+__pycache__/
+*.pyc
+*.deb
